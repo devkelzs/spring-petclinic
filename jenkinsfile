@@ -32,18 +32,22 @@ pipeline {
     post {
         success {
             script {
-                sh """
-                    curl -X POST -H 'Content-type: application/json' \\
-                    --data '{"text":"✅ Build succeeded on agent"}' ${env.SLACK_WEBHOOK_URL}
-                """
+                node('agent1') {
+                    sh """
+                        curl -X POST -H 'Content-type: application/json' \\
+                        --data '{"text":"✅ Build succeeded on agent"}' ${env.SLACK_WEBHOOK_URL}
+                    """
+                }
             }
         }
         failure {
             script {
-                sh """
-                    curl -X POST -H 'Content-type: application/json' \\
-                    --data '{"text":"❌ Build failed on agent"}' ${env.SLACK_WEBHOOK_URL}
-                """
+                node('agent1') {
+                    sh """
+                        curl -X POST -H 'Content-type: application/json' \\
+                        --data '{"text":"❌ Build failed on agent"}' ${env.SLACK_WEBHOOK_URL}
+                    """
+                }
             }
         }
     }
