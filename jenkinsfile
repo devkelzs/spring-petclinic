@@ -1,0 +1,40 @@
+pipeline {
+    agent { label 'agent1' }
+
+    tools {
+        maven 'Maven 3.8.1'
+    }
+
+    environment {
+        SLACK_WEBHOOK_URL = credentials('slack-webhook')
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git 'https://github.com/devkelzs/spring-petclinic.git'
+            }
+        }
+
+        stage('OWASP Dependency Check') {
+            steps {
+                dependencyCheck additionalArguments: '--format HTML --failOnCVSS 7'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh 'mvn clean install'
+            }
+        }
+    }
+
+    post {
+        failure {
+            slackSend(channel: '#alerts', message: "❌ Build failed on agent", webhookUrl: "${env.SLACK_WEBHOOK_URL}")
+        }
+        success {
+            slackSend(channel: '#alerts', message: "✅ Build succeeded on agent", webhookUrl: "${env.SLACK_WEBHOOK_URL}")
+        }
+    }
+}
