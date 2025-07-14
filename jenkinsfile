@@ -2,7 +2,7 @@ pipeline {
     agent { label 'agent1' }
 
     tools {
-        maven 'Maven 3.8.1'
+        maven 'Maven 3.8.1'  // Ensure this name matches your Jenkins Global Tool config
     }
 
     environment {
@@ -18,7 +18,7 @@ pipeline {
 
         stage('OWASP Dependency Check') {
             steps {
-                dependencyCheck additionalArguments: '--format HTML --failOnCVSS 7'
+                dependencyCheck odcInstallation: 'Dependency-Check-CLI', additionalArguments: '--format HTML --failOnCVSS 7'
             }
         }
 
