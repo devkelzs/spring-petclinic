@@ -2,11 +2,11 @@ pipeline {
     agent { label 'agent1' }
 
     tools {
-        maven 'Maven 3.8.1'  // Ensure this matches your Maven tool config
+        maven 'Maven 3.8.1'
     }
 
     environment {
-        SLACK_WEBHOOK_URL = credentials('slack-webhook')  // Make sure this secret text credential exists
+        SLACK_WEBHOOK_URL = credentials('slack-webhook')
     }
 
     stages {
@@ -31,7 +31,7 @@ pipeline {
 
     post {
         success {
-            node {
+            script {
                 sh """
                     curl -X POST -H 'Content-type: application/json' \\
                     --data '{"text":"✅ Build succeeded on agent"}' ${env.SLACK_WEBHOOK_URL}
@@ -39,7 +39,7 @@ pipeline {
             }
         }
         failure {
-            node {
+            script {
                 sh """
                     curl -X POST -H 'Content-type: application/json' \\
                     --data '{"text":"❌ Build failed on agent"}' ${env.SLACK_WEBHOOK_URL}
