@@ -2,11 +2,11 @@ pipeline {
     agent { label 'agent1' }
 
     tools {
-        maven 'Maven 3.8.1'  // Ensure this name matches your Jenkins Global Tool config
+        maven 'Maven 3.8.1'  // Ensure this matches your Maven tool config
     }
 
     environment {
-        SLACK_WEBHOOK_URL = credentials('slack-webhook')
+        SLACK_WEBHOOK_URL = credentials('slack-webhook')  // Make sure this secret text credential exists
     }
 
     stages {
@@ -30,11 +30,17 @@ pipeline {
     }
 
     post {
-        failure {
-            slackSend(channel: '#alerts', message: "❌ Build failed on agent", webhookUrl: "${env.SLACK_WEBHOOK_URL}")
-        }
         success {
-            slackSend(channel: '#alerts', message: "✅ Build succeeded on agent", webhookUrl: "${env.SLACK_WEBHOOK_URL}")
+            sh """
+                curl -X POST -H 'Content-type: application/json' \
+                --data '{"text":"✅ Build succeeded on agent"}' ${env.SLACK_WEBHOOK_URL}
+            """
+        }
+        failure {
+            sh """
+                curl -X POST -H 'Content-type: application/json' \
+                --data '{"text":"❌ Build failed on agent"}' ${env.SLACK_WEBHOOK_URL}
+            """
         }
     }
 }
